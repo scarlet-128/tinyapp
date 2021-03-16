@@ -3,7 +3,6 @@ const app = express();
 const PORT = 8080;
 
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -16,6 +15,7 @@ app.post("/urls", (req, res) => {
 function generateRandomString() {
   
 }
+app.use(bodyParser.urlencoded({extended: false}));
 app.set("view engine", "ejs");
 
 app.get("/", (req, res) => {
@@ -37,6 +37,10 @@ app.get("/urls", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL};
   res.render("urls_show", templateVars);
+});
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase.shortURL;
+  res.redirect(longURL);
 });
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

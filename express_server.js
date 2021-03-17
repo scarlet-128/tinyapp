@@ -18,17 +18,20 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-const users = { nameX : "password"}
+const users = "Namex"
   
 
 app.get("/login", (req, res) => {
-  res.render("login");
+
+  const templateVars = {users: `Login as ${users}`}
+  res.render("login",templateVars);
 });
 app.post("/login",(req,res) => {
-  const templateVars = {user,}
+  const templateVars = {users: `Login as ${users.user}`}
   const userName = req.body.username
   res.cookie("user",username);
-  res.redirect("/login");å
+  res.redirect("/login",templateVars)
+
 })
 app.post("/urls", (req, res) => {
   console.log(req.body);  
@@ -48,15 +51,9 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 app.get("/urls", (req, res) => {
-  const userId = req.cookies["userId"];
 
-  let currentUser = users[userId];
-  if (!userId) currentUser = false;
   const templateVars = {
-    email: currentUser["email"],
-    userId: userId,
-    urls: urlDatabase,
-    user: currentUser
+    urls: urlDatabase
   };
   res.render("urls_index", templateVars);
 });

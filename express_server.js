@@ -67,24 +67,32 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login",(req,res) => {
-  let validation = false
-  const email = req.body.email
-  const password = req.body.password
-  // console.log(users)
+  let validation = false;
+  const email = req.body.email;
+  const password = req.body.password;
   for (let user in users) {
-    // console.log(users[user])
     if(email === users[user]["email"] && password === users[user]["password"]) {
-    // console.log("hello world")
-    validation = true
-        res.cookie("user_id",users[user].id);
-        res.redirect("/urls");
-      }     
+      validation = true
+      res.cookie("user_id",users[user].id);
+      res.redirect("/urls");
+      } }
+      
+  if(validation === false) {
+    let hold = 0;
+    for (let user in users) {
+      if (email !== users[user]["email"]) {
+        hold++;
+          } 
     }
-    if(validation = false) {
-    res.send("there is an error!")
+    // console.log(Object.keys(users).length);
+    if (hold === Object.keys(users).length) {
+      res.send("wrong email")
+    } else {
+      res.send ("wrong password")
     }
+  }
 
-})
+});
 
 app.post("/urls", (req, res) => {
   // console.log(req.body);
@@ -109,6 +117,9 @@ app.get("/", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const templateVars = {users : users,
     id : req.cookies["user_id"]}
+    if(!req.cookies["user_id"]) {
+      res.redirect("/login");
+    }
 res.render("urls_new",templateVars);
 });
 app.get("/urls.json", (req, res) => {
@@ -171,7 +182,7 @@ app.post("/urls/:shortURL",(req,res) => {
 
 
 app.post("/logout", (req, res) => {
-  console.log(req.cookies)
+  // console.log(req.cookies)
   res.clearCookie('user_id');
   res.redirect('/urls');
 });

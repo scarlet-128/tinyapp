@@ -10,9 +10,11 @@
         <a class="nav-item nav-link" href="/urls/new">Create New </a>
       </div>
       <nav >
-        <%if (user) {%>
-          <%= `Login as ${user}`%>
-          <a name="email" class="btn btn-info" method="submit" href="/urls">Logout</a>
+        <%if (users[id]) {%>
+          <%= `Login as ${users[id].email}`%>
+          <form action="/logout" method="POST">
+          <button name="email" class="btn btn-info" type="submit">Logout</button>
+        </form>
           <% } else { %>
         <div class="navbar-nav mr-auto">
         <form action="/login" method="post">

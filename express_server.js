@@ -4,6 +4,7 @@ const PORT = 8080;
 
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.set("view engine", "ejs");
@@ -64,10 +65,18 @@ app.post("/register",(req,res) =>{
       })
     }
   }
-  users[id] = {id,email,password}
-  // console.log(users)
-  res.cookie("user_id",id);
+  bcrypt.genSalt(10).then((salt) => {
+    return bcrypt.hash(password,salt);
+  })
+  .then((hash) => {
+    users[id] = {id,email,password:hash}
+    res.cookie("user_id",id);
+console.log(users)
+
   res.redirect("/urls");
+  })
+  
+  
 })
 
 
@@ -78,30 +87,58 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login",(req,res) => {
-  let validation = false;
+   let validation = false;
   const email = req.body.email;
+  console.log(email);
   const password = req.body.password;
+  // for (let user in users) {
+  //      if(email !== users[user].email ) {
+  //   return res.status(401).send("Wrong email address!");
+  // } };
+  // for (let user in users) {
+  // bcrypt.compare(password,users[user]["password"]).then((result)=>{
+  //   if (result){
+  //     res.cookie("user_id",users[user].id);
+  //   res.redirect("/urls");
+  //   } else {
+  //     return res.status(401).send("Whooo password is wrong!")
+  //   }
+  // })
+  // }
   for (let user in users) {
-    if(email === users[user]["email"] && password === users[user]["password"]) {
-      validation = true
-      res.cookie("user_id",users[user].id);
-      res.redirect("/urls");
-      } }
+    if(email === users[user]["email"] ) {
+      validation = true;
+      bcrypt.compare(password,users[user]["password"]).then((result)=>{
+        if (result){
+          res.cookie("user_id",users[user].id);
+          res.redirect("/urls");
+        } else {
+          return res.status(401).send("Whooo password is wrong!")
+        }
+      })
       
-  if(validation === false) {
-    let hold = 0;
-    for (let user in users) {
-      if (email !== users[user]["email"]) {
-        hold++;
-          } 
+     } 
+      // else {
+      //   return res.status(401).send("Wrong email address")
+      // }
     }
-    // console.log(Object.keys(users).length);
-    if (hold === Object.keys(users).length) {
-      res.send("wrong email")
-    } else {
-      res.send ("wrong password")
-    }
-  }
+      if (validation === false) {
+        return res.status(401).send("Wrong email address")
+      }
+  // if(validation === false) {
+  //   let hold = 0;
+  //   for (let user in users) {
+  //     if (email !== users[user]["email"]) {
+  //       hold++;
+  //         } 
+  //   }
+  //   // console.log(Object.keys(users).length);
+  //   if (hold === Object.keys(users).length) {
+  //     res.send("wrong email")
+  //   } else {
+  //     res.send ("wrong password")
+  //   }
+  // }
 
 });
 

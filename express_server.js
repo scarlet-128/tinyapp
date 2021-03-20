@@ -5,6 +5,10 @@ const PORT = 8080;
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
+const {
+  getUserByEmail
+} = require('./helper');
+
 app.use(bodyParser.urlencoded({extended: true}));
 // app.use(cookieParser());
 app.set("view engine", "ejs");
@@ -77,7 +81,7 @@ app.post("/register",(req,res) =>{
     // res.session("user_id",id);
     req.session.user_id = id
 
-console.log(users)
+// console.log(users)
 
   res.redirect("/urls");
   })
@@ -93,61 +97,40 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login",(req,res) => {
-   let validation = false;
+  // let validation = false;
   const email = req.body.email;
-  console.log(email);
+  // console.log(email);
   const password = req.body.password;
+  let currentUser = users[getUserByEmail(email,users)]
+  if (!currentUser) {
+     return res.status(401).send("Wrong email address")  
+  }
   // for (let user in users) {
-  //      if(email !== users[user].email ) {
-  //   return res.status(401).send("Wrong email address!");
-  // } };
-  // for (let user in users) {
-  // bcrypt.compare(password,users[user]["password"]).then((result)=>{
-  //   if (result){
-  //     res.cookie("user_id",users[user].id);
-  //   res.redirect("/urls");
-  //   } else {
-  //     return res.status(401).send("Whooo password is wrong!")
-  //   }
-  // })
-  // }
-  for (let user in users) {
-    if(email === users[user]["email"] ) {
-      validation = true;
-      bcrypt.compare(password,users[user]["password"]).then((result)=>{
+    //  if(email === currentUser["email"] ) {
+    //    validation = true;
+      bcrypt.compare(password,currentUser["password"]).then((result)=>{
         if (result){
           // res.cookie("user_id",users[user].id);
-          req.session.user_id = users[user].id
+          req.session.user_id = currentUser.id
           res.redirect("/urls");
         } else {
           return res.status(401).send("Whooo password is wrong!")
         }
       })
-      
-     } 
-      // else {
+    // } else {
       //   return res.status(401).send("Wrong email address")
       // }
-    }
-      if (validation === false) {
-        return res.status(401).send("Wrong email address")
-      }
-  // if(validation === false) {
-  //   let hold = 0;
-  //   for (let user in users) {
-  //     if (email !== users[user]["email"]) {
-  //       hold++;
-  //         } 
-  //   }
-  //   // console.log(Object.keys(users).length);
-  //   if (hold === Object.keys(users).length) {
-  //     res.send("wrong email")
-  //   } else {
-  //     res.send ("wrong password")
-  //   }
-  // }
-
+      
+    //  } 
+      
+    // }
+      //  if (validation === false) {
+      //   return res.status(401).send("Wrong email address")
+      //  }
+  
 });
+
+
 
 app.post("/urls", (req, res) => {
   // console.log(req.body);

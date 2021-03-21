@@ -57,7 +57,6 @@ app.get("/register", (req, res) => {
 
 //register handler
 app.post("/register",(req,res) =>{
-  // console.log("req:",req.body);
   const email = req.body.email
   const password = req.body.password
   const id = generateRandomString();
@@ -89,18 +88,19 @@ app.post("/login",(req,res) => {
   const email = req.body.email;
   const password = req.body.password;
   let currentUser = users[getUserByEmail(email,users)]
+  
   if (!currentUser) {
      return res.status(401).send("Wrong email address")  
   }
   bcrypt.compare(password,currentUser["password"]).then((result)=>{
         if (result){
-          // res.cookie("user_id",users[user].id);
           req.session.user_id = currentUser.id
           res.redirect("/urls");
         } else {
           return res.status(401).send("Whooo password is wrong!")
         }
   })
+  
 });
 
 app.post("/urls", (req, res) => {
@@ -157,6 +157,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete",(req,res) => {
+  
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls")
 })

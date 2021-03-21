@@ -69,7 +69,11 @@ app.post("/register",(req,res) =>{
   })
   .then((hash) => {
     users[id] = {id,email,password:hash}
+    // res.session("user_id",id);
     req.session.user_id = id
+
+// console.log(users)
+
   res.redirect("/urls");
   })
   
@@ -92,9 +96,11 @@ app.post("/login",(req,res) => {
   for (let user in users) {
     if(email === users[user]["email"] ) {
       validation = true;
-    
+    //  if(email === currentUser["email"] ) {
+    //    validation = true;
       bcrypt.compare(password,currentUser["password"]).then((result)=>{
         if (result){
+          // res.cookie("user_id",users[user].id);
           req.session.user_id = users[user].id
           req.session.user_id = currentUser.id
           res.redirect("/urls");
@@ -104,12 +110,10 @@ app.post("/login",(req,res) => {
       })
 
      } 
-     
     }
       if (validation === false) {
         return res.status(401).send("Wrong email address")
       }
-
 
 });
 
@@ -120,10 +124,11 @@ app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const shortURL = generateRandomString();
   const userId = req.session.user_id;
+  const list = urlsForUser(userId);
   if (!userId) {
     res.redirect('/login');
   }
-  
+  if (!list) return res.status(403).send(`Whooops something wrong`);
   urlDatabase[shortURL] = {longURL, userID: req.session.user_id };
   res.redirect("/urls");
 });
@@ -145,9 +150,6 @@ app.get("/urls.json", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
-
-
-
 //get the urls page
 app.get("/urls", (req, res) => {
   
@@ -180,8 +182,7 @@ app.get("/urls/:shortURL", (req, res) => {
   if (!userId) {
     res.redirect('/login');
   }
-  if (!list[req.params.id]) return res.status(403).send(`Whooops something wrong`);
-  
+  if (!list) return res.status(403).send(`Whooops something wrong`);
   res.render("urls_show", templateVars);
 });
 app.post("/urls/:shortURL/delete",(req,res) => {
@@ -190,27 +191,22 @@ app.post("/urls/:shortURL/delete",(req,res) => {
   if (!userId) {
     res.redirect('/login');
   }
-  if (!list[req.params.id]) return res.status(403).send(`Whooops something wrong`);
+  if (!list) return res.status(403).send(`Whooops something wrong`);
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls")
 })
-
-
 app.post("/urls/:id", (req,res) => {
   const longURL = req.body.longURL;
   const id = req.params.id;
-  if (!userId) {
-    return res.status(403).send(`Please login first`);
-  }
   const userId = req.session.user_id;
   const list = urlsForUser(userId);
-  if (!list[req.params.id]) return res.status(403).send(`Whooops something wrong`);
+  if (!userId) {
+    res.redirect('/login');
+  }
+  if (!list) return res.status(403).send(`Whooops something wrong`);
   urlDatabase[id].longURL = longURL;
-  res.redirect("/urls/:")
+  res.redirect("/urls")
 })
-
-
-
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   

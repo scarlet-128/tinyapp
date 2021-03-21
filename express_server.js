@@ -133,7 +133,7 @@ app.post("/urls", (req, res) => {
   res.redirect("/urls");
 });
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/login");
 });
 app.get("/urls/new", (req, res) => {
   const templateVars = {users : users,
@@ -152,22 +152,27 @@ app.get("/hello", (req, res) => {
 });
 //get the urls page
 app.get("/urls", (req, res) => {
-  
-  const userId =req.session.user_id
+  const userId = req.session.user_id;
+  const list = urlsForUser(userId);
+  const templateVars = {
+    urls: urlsForUser(userId),
+    email:  req.session.email,
+    users : users,
+      id : userId,
+  };
+  if (!userId) {
+    res.redirect('/login');
+  } else {res.render("urls_index", templateVars);}
+  if (!list) return res.status(403).send(`Whooops something wrong`);
+  // const userId =req.session.user_id
   // console.log("x:",userId)
-  if (!userId && userId!==null) {
+  // if (userId === null && !userId) {
     
-    res.redirect("/login");
-  } else {
-    const templateVars = {
-      urls: urlsForUser(userId),
-      email:  req.session.email,
-      users : users,
-        id : userId,
-      
-    };
-  res.render("urls_index", templateVars);
-  }
+  //   res.redirect("/login");
+   
+    
+  
+ 
    
   
 });
